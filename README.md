@@ -73,7 +73,7 @@ shelfcam-backend/
 
 ```bash
 python -m venv venv
-.env\Scriptsctivate   # Windows
+.\venv\Scripts\activate   # Windows
 # OR
 source venv/bin/activate  # macOS/Linux
 ```
