@@ -1,20 +1,23 @@
 
 # 🛒 ShelfCam Backend
 
-**AI-powered FastAPI backend for real-time retail shelf monitoring**, developed for Walmart Sparkathon 2025. This backend handles detection, inventory tracking, user roles, and integration with Edge AI and PostgreSQL.
+**AI-powered FastAPI backend for real-time retail shelf monitoring**, developed for Walmart Sparkathon 2025. This backend handles detection, inventory tracking, authentication, and role-based access using Edge AI and PostgreSQL.
 
 ---
 
 ## 🚀 Features
 
+- 🔐 **Authentication System**
+  - `POST /auth/signup`: Register user with role (`admin`, `manager`, `staff`)
+  - `POST /auth/login`: JWT-based login returns access token
+  - Role-based access protection for endpoints
 - 🧠 AI Inference Integration (YOLOv5 / ONNX)
 - 📦 Real-time Shelf Monitoring API
 - 📊 Inventory & Misplacement Detection
-- 🔐 JWT-Based Role Authentication (Staff, Manager, Admin)
 - 🔄 Offline-First Support with Sync
-- 🗃 PostgreSQL Support (production-grade database)
-- 🔌 RESTful API with FastAPI
-- 📁 Modular Project Structure
+- 🗃 PostgreSQL (Production-grade)
+- 🌐 RESTful FastAPI Interface
+- 🧪 Swagger UI for testing
 
 ---
 
@@ -22,11 +25,11 @@
 
 ```
 Mobile Camera / Pi Camera
-        ↓
+↓
 Edge AI Model (YOLOv5n, ONNX)
-        ↓
+↓
 FastAPI Backend ───▶ PostgreSQL
-        ↓
+↓
 React Frontend Dashboard
 ```
 
@@ -34,125 +37,139 @@ React Frontend Dashboard
 
 ## 🧰 Tech Stack
 
-| Layer         | Technology                                  |
-|---------------|---------------------------------------------|
-| Backend       | FastAPI                                     |
-| Database      | PostgreSQL                                  |
-| AI Inference  | YOLOv5n + ONNX                              |
-| Auth          | JWT                                         |
-| Data Sync     | JSON/SQLite (offline-capable edge devices)  |
-| Frontend      | [shelfcam-frontend](https://github.com/<your-username>/shelfcam-frontend) |
+| Layer         | Technology     |
+|---------------|----------------|
+| Backend       | FastAPI        |
+| Database      | PostgreSQL     |
+| AI Inference  | YOLOv5n + ONNX |
+| Auth          | JWT            |
+| Frontend      | React.js       |
 
 ---
 
-## 📦 Project Structure
+## 📁 Project Structure
 
 ```
 shelfcam-backend/
 ├── app/
-│   ├── api/routes/        # API Endpoints
-│   ├── core/              # Configs, DB Setup
-│   ├── crud/              # DB Operations
-│   ├── models/            # SQLAlchemy Models
-│   ├── schemas/           # Pydantic Schemas
-│   ├── services/          # AI Integration Logic
-│   └── main.py            # Entry Point
-├── models/                # AI Model Files (.onnx)
-├── database/              # SQL Scripts, offline DBs
-├── scripts/               # Sync / Utility Scripts
-├── .env                   # Environment Variables
-├── requirements.txt       # Python Dependencies
-└── init_db.py             # DB Table Creator Script
+│   ├── api/routes/        # All API endpoints
+│   ├── core/              # Configs & settings
+│   ├── crud/              # Database operations
+│   ├── models/            # SQLAlchemy models
+│   ├── schemas/           # Pydantic schemas
+│   ├── services/          # AI & auth utilities
+│   └── main.py            # Entry point
+├── database/              # DB config
+├── models/                # AI model files (.onnx)
+├── scripts/               # Utility scripts
+├── .env                   # Env variables
+├── requirements.txt       # Python dependencies
+└── README.md
 ```
 
 ---
 
-## 🧪 Setup Instructions
+## 🔐 Auth API Usage
 
-### 1. Create Virtual Environment
+### ➕ Signup
 
-```bash
-python -m venv venv
-.\venv\Scripts\activate   # Windows
-# OR
-source venv/bin/activate  # macOS/Linux
+`POST /auth/signup`
+
+```json
+{
+  "username": "admin1",
+  "email": "admin@example.com",
+  "password": "admin123",
+  "role": "admin"
+}
 ```
 
-### 2. Install Dependencies
+### 🔑 Login
 
-```bash
-pip install -r requirements.txt
+`POST /auth/login`
+
+```json
+{
+  "username": "admin1",
+  "password": "admin123"
+}
 ```
 
-### 3. Configure `.env` File
-
-Create a `.env` file in the project root and add the following:
-
-```ini
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/shelfcam_db
-```
-
-Replace `<username>` and `<password>` with your actual PostgreSQL credentials.
-
-### 🏗 4. Initialize Database
-
-```bash
-python init_db.py
-```
-
-### 🚀 5. Run the Server
-
-```bash
-uvicorn app.main:app --reload
+**Response:**
+```json
+{
+  "access_token": "<JWT_TOKEN>",
+  "token_type": "bearer",
+  "username": "admin1",
+  "role": "admin"
+}
 ```
 
 ---
 
-## Visit:
-
-- **API root:** [http://127.0.0.1:8000](http://127.0.0.1:8000)  
-- **Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-
----
-
-### 📡 API Endpoints (Sample)
-
-| Method | Endpoint       | Description                        |
-|--------|----------------|------------------------------------|
-| GET    | `/`            | Welcome message                    |
-| POST   | `/detect`      | Run AI inference on shelf image    |
-| GET    | `/inventory`   | List all products                  |
-| POST   | `/login`       | JWT-based login                    |
-
----
-
-### 👥 Roles
+### 👥 Roles & Access
 
 | Role    | Permissions                                 |
 |---------|---------------------------------------------|
 | Staff   | View alerts, mark shelf tasks done          |
-| Manager | Assign tasks, manage categories             |
+| Manager | Assign tasks, manage inventory              |
 | Admin   | Full system control, audit logs             |
 
 ---
 
-### 📌 To-Do / Roadmap
+## 🧪 Setup & Run
 
-- [ ] Add real-time image sync from Pi camera  
-- [ ] Deploy using Docker & CI/CD  
-- [ ] Add audit logging  
-- [ ] Connect to live inventory from Walmart APIs (mock)  
+### 1. Clone the repo
+```bash
+git clone https://github.com/<your-username>/shelfcam-backend.git
+cd shelfcam-backend
+```
+
+### 2. Create virtual environment
+```bash
+python -m venv venv
+.env\Scriptsctivate   # Windows
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure `.env`
+```
+DATABASE_URL=postgresql://postgres:<password>@localhost:5432/shelfcam_db
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+### 5. Run the server
+```bash
+uvicorn app.main:app --reload
+```
+
+### 6. Test via Swagger UI
+[http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-### 🛡 License
+## 📌 To-Do / Roadmap
 
-This project is licensed for educational and hackathon use.  
-For production licensing, contact the maintainers.
+- [ ] Add JWT token refresh
+- [ ] Add audit logging
+- [ ] Dockerize with PostgreSQL
+- [ ] Connect real-time camera stream
+- [ ] CI/CD pipeline for deployment
 
 ---
 
-### 🔗 Related Repos
+## 🔗 Related Repositories
 
-- **Frontend:** `shelfcam-frontend`  
-- **Demo Video & Pitch Deck:** *(link once uploaded)*
+- [Frontend (React)](https://github.com/rakeshyemineni1/shelfcam-frontend)
+
+---
+
+## 📄 License
+
+This project is for educational and hackathon use. For production licensing, contact the maintainers.
