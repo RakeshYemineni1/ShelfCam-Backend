@@ -1,175 +1,108 @@
 
-# 🛒 ShelfCam Backend
+# 🔐 ShelfCam Authentication Backend
 
-**AI-powered FastAPI backend for real-time retail shelf monitoring**, developed for Walmart Sparkathon 2025. This backend handles detection, inventory tracking, authentication, and role-based access using Edge AI and PostgreSQL.
-
----
-
-## 🚀 Features
-
-- 🔐 **Authentication System**
-  - `POST /auth/signup`: Register user with role (`admin`, `manager`, `staff`)
-  - `POST /auth/login`: JWT-based login returns access token
-  - Role-based access protection for endpoints
-- 🧠 AI Inference Integration (YOLOv5 / ONNX)
-- 📦 Real-time Shelf Monitoring API
-- 📊 Inventory & Misplacement Detection
-- 🔄 Offline-First Support with Sync
-- 🗃 PostgreSQL (Production-grade)
-- 🌐 RESTful FastAPI Interface
-- 🧪 Swagger UI for testing
+FastAPI-based login system for ShelfCam — a retail shelf monitoring project. This module handles secure authentication for multiple user roles without password hashing (for internal/test use only).
 
 ---
 
-## 🧱 Architecture Overview
+## 📦 Features
+
+- ✅ FastAPI backend
+- ✅ PostgreSQL integration
+- ✅ Role-based login system:
+  - Staff
+  - Store Manager
+  - Area Manager
+- ✅ JWT Token generation
+- ✅ `.env` configuration support
+
+---
+
+## 🛠️ Tech Stack
+
+- FastAPI
+- PostgreSQL
+- SQLAlchemy
+- Pydantic v2
+- Uvicorn
+- Python 3.11+
+- JWT (`python-jose`)
+- dotenv (`pydantic-settings`)
+
+---
+
+## 🔧 Project Structure
 
 ```
-Mobile Camera / Pi Camera
-↓
-Edge AI Model (YOLOv5n, ONNX)
-↓
-FastAPI Backend ───▶ PostgreSQL
-↓
-React Frontend Dashboard
-```
-
----
-
-## 🧰 Tech Stack
-
-| Layer         | Technology     |
-|---------------|----------------|
-| Backend       | FastAPI        |
-| Database      | PostgreSQL     |
-| AI Inference  | YOLOv5n + ONNX |
-| Auth          | JWT            |
-| Frontend      | React.js       |
-
----
-
-## 📁 Project Structure
-
-```
-shelfcam-backend/
+ShelfCam-Backend/
 ├── app/
-│   ├── api/routes/        # All API endpoints
-│   ├── core/              # Configs & settings
-│   ├── crud/              # Database operations
-│   ├── models/            # SQLAlchemy models
-│   ├── schemas/           # Pydantic schemas
-│   ├── services/          # AI & auth utilities
-│   └── main.py            # Entry point
-├── database/              # DB config
-├── models/                # AI model files (.onnx)
-├── scripts/               # Utility scripts
-├── .env                   # Env variables
-├── requirements.txt       # Python dependencies
-└── README.md
+│   ├── api/routes/auth.py       # Login route
+│   ├── core/
+│   │   ├── config.py            # Settings using pydantic-settings
+│   │   └── jwt_token.py         # Token generator
+│   ├── database/db.py           # SQLAlchemy DB setup
+│   ├── models/employee.py       # Employee ORM model
+│   └── schemas/user.py          # Pydantic models
+├── .env                         # Environment variables
+└── main.py                      # FastAPI app entry point
 ```
 
 ---
 
-## 🔐 Auth API Usage
+## 📄 .env Configuration
 
-### ➕ Signup
+Create a `.env` file at the project root:
 
-`POST /auth/signup`
-
-```json
-{
-  "username": "admin1",
-  "email": "admin@example.com",
-  "password": "admin123",
-  "role": "admin"
-}
 ```
-
-### 🔑 Login
-
-`POST /auth/login`
-
-```json
-{
-  "username": "admin1",
-  "password": "admin123"
-}
-```
-
-**Response:**
-```json
-{
-  "access_token": "<JWT_TOKEN>",
-  "token_type": "bearer",
-  "username": "admin1",
-  "role": "admin"
-}
+DATABASE_URL=postgresql://postgres:yourpassword@localhost/shelfCam_auth
+SECRET_KEY=your_super_secret_key
 ```
 
 ---
 
-### 👥 Roles & Access
+## 🚀 Run the App
 
-| Role    | Permissions                                 |
-|---------|---------------------------------------------|
-| Staff   | View alerts, mark shelf tasks done          |
-| Manager | Assign tasks, manage inventory              |
-| Admin   | Full system control, audit logs             |
-
----
-
-## 🧪 Setup & Run
-
-### 1. Clone the repo
 ```bash
-git clone https://github.com/<your-username>/shelfcam-backend.git
-cd shelfcam-backend
-```
+# 1. Activate virtual environment
+cd ShelfCam-Backend
+venv\Scripts\activate  # (Windows)
 
-### 2. Create virtual environment
-```bash
-python -m venv venv
-.env\Scriptsctivate   # Windows
-```
-
-### 3. Install dependencies
-```bash
+# 2. Install requirements
 pip install -r requirements.txt
-```
 
-### 4. Configure `.env`
-```
-DATABASE_URL=postgresql://postgres:<password>@localhost:5432/shelfcam_db
-SECRET_KEY=your_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-### 5. Run the server
-```bash
+# 3. Start the server
 uvicorn app.main:app --reload
 ```
 
-### 6. Test via Swagger UI
-[http://localhost:8000/docs](http://localhost:8000/docs)
+---
+
+## ✅ API Endpoint
+
+### 🔐 POST `/auth/login`
+
+Login with employee credentials.
+
+#### Request Body
+```json
+{
+  "employee_id": "E101",
+  "username": "staff1",
+  "password": "staffpass",
+  "role": "staff"
+}
+```
+
+#### Response
+```json
+{
+  "access_token": "your.jwt.token",
+  "token_type": "bearer"
+}
+```
 
 ---
 
-## 📌 To-Do / Roadmap
+## ⚠️ Notes
 
-- [ ] Add JWT token refresh
-- [ ] Add audit logging
-- [ ] Dockerize with PostgreSQL
-- [ ] Connect real-time camera stream
-- [ ] CI/CD pipeline for deployment
-
----
-
-## 🔗 Related Repositories
-
-- [Frontend (React)](https://github.com/rakeshyemineni1/shelfcam-frontend)
-
----
-
-## 📄 License
-
-This project is for educational and hackathon use. For production licensing, contact the maintainers.
+- Passwords are stored in plain text — intended for internal use or testing only.
+- Do not use this in production without password hashing and security enhancements.
