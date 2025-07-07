@@ -1,108 +1,100 @@
+# 🛒 ShelfCam Backend - Staff & Inventory Assignment System
 
-# 🔐 ShelfCam Authentication Backend
-
-FastAPI-based login system for ShelfCam — a retail shelf monitoring project. This module handles secure authentication for multiple user roles without password hashing (for internal/test use only).
-
----
-
-## 📦 Features
-
-- ✅ FastAPI backend
-- ✅ PostgreSQL integration
-- ✅ Role-based login system:
-  - Staff
-  - Store Manager
-  - Area Manager
-- ✅ JWT Token generation
-- ✅ `.env` configuration support
+AI-powered FastAPI backend for real-time **retail shelf monitoring and staff assignment**, developed for Walmart Sparkathon 2025. This system enables secure role-based staff management, intelligent shelf staff assignment tracking, and inventory monitoring.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Features
 
-- FastAPI
-- PostgreSQL
-- SQLAlchemy
-- Pydantic v2
-- Uvicorn
-- Python 3.11+
-- JWT (`python-jose`)
-- dotenv (`pydantic-settings`)
+### 👥 Staff Management
+- JWT-protected login system with roles: `staff`, `manager`, `admin`
+- Staff profile with:
+  - `employee_id` (string, primary)
+  - `username`, `email`, `phone`, `whatsapp`, `dob`
+  - Role-based access to profile
+- Endpoints:
+  - `POST /auth/login` – Login with username, password, role
+  - `GET /me/profile` – View own profile
+  - `PUT /me/profile` – Update own profile
 
----
+### 📋 Staff Assignment
+- Assign staff (`employee_id`) to a shelf (`shelf_id`)
+- Prevent reassigning if already active
+- Record history in `assignment_history`:
+  - `employee_id`, `shelf_id`, `action`, `performed_by`, `timestamp`
+- Models:
+  - `staff_assignments`
+  - `assignment_history`
 
-## 🔧 Project Structure
+- Endpoints:
+  - `POST /staff-assignments/assign?employee_id=E101`
+  - `GET /staff-assignments/current` – Current active assignments
+  - `POST /staff-assignments/unassign?employee_id=E101` – Unassign staff
 
-```
-ShelfCam-Backend/
-├── app/
-│   ├── api/routes/auth.py       # Login route
-│   ├── core/
-│   │   ├── config.py            # Settings using pydantic-settings
-│   │   └── jwt_token.py         # Token generator
-│   ├── database/db.py           # SQLAlchemy DB setup
-│   ├── models/employee.py       # Employee ORM model
-│   └── schemas/user.py          # Pydantic models
-├── .env                         # Environment variables
-└── main.py                      # FastAPI app entry point
-```
+### 🧊 Shelf Management
+- Shelves are defined using shelf `name` (e.g., A1, A2, etc.)
+- Related to `inventory_items` and staff assignments
 
----
-
-## 📄 .env Configuration
-
-Create a `.env` file at the project root:
-
-```
-DATABASE_URL=postgresql://postgres:yourpassword@localhost/shelfCam_auth
-SECRET_KEY=your_super_secret_key
-```
+### 📦 Inventory Management
+- Linked to shelves via shelf `name`
+- Tracks low stock and item details (future extension for Edge AI)
 
 ---
 
-## 🚀 Run the App
+## 🧩 Technologies
+
+- **FastAPI** – Web Framework
+- **SQLAlchemy** – ORM
+- **PostgreSQL** – Relational Database
+- **Uvicorn** – ASGI server
+- **JWT Auth** – User-based auth and protected routes
+
+---
+
+## 🛠 Setup Instructions
 
 ```bash
-# 1. Activate virtual environment
+git clone https://github.com/your-repo/ShelfCam-Backend.git
 cd ShelfCam-Backend
-venv\Scripts\activate  # (Windows)
-
-# 2. Install requirements
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
-
-# 3. Start the server
 uvicorn app.main:app --reload
 ```
 
 ---
 
-## ✅ API Endpoint
+## ✅ Tables Overview
 
-### 🔐 POST `/auth/login`
+### staff_assignments
+| Column        | Type    |
+|---------------|---------|
+| id            | Integer |
+| employee_id   | String  |
+| shelf_id      | String  |
+| assigned_by   | String  |
+| is_active     | Boolean |
+| assigned_at   | DateTime|
 
-Login with employee credentials.
-
-#### Request Body
-```json
-{
-  "employee_id": "E101",
-  "username": "staff1",
-  "password": "staffpass",
-  "role": "staff"
-}
-```
-
-#### Response
-```json
-{
-  "access_token": "your.jwt.token",
-  "token_type": "bearer"
-}
-```
+### assignment_history
+| Column        | Type    |
+|---------------|---------|
+| id            | Integer |
+| employee_id   | String  |
+| shelf_id      | String  |
+| action        | String  |
+| action_date   | DateTime|
+| performed_by  | String  |
+| notes         | Text    |
 
 ---
 
-## ⚠️ Notes
+## 📬 Contribution
 
-- Passwords are stored in plain text — intended for internal use or testing only.
-- Do not use this in production without password hashing and security enhancements.
+Pull requests and issue reports are welcome! Please ensure proper testing before submitting.
+
+---
+
+## 🧑‍💻 Developed By
+
+**Team ShelfCam - Walmart Sparkathon 2025**

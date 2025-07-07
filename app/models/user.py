@@ -1,11 +1,17 @@
-from sqlalchemy import Column, Integer, String
-from app.core.database import Base
+from pydantic import BaseModel
+from enum import Enum
 
-class User(Base):
-    __tablename__ = "users"
+class UserRole(str, Enum):
+    area_manager = "area_manager"
+    store_manager = "store_manager"
+    staff = "staff"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    role = Column(String, default="staff")  # Add roles here
+class LoginRequest(BaseModel):
+    employee_id: str
+    username: str
+    password: str
+    role: UserRole
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
