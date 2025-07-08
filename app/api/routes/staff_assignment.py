@@ -250,46 +250,6 @@ def unassign_staff(assignment_id: int, db: Session = Depends(get_db), current_us
     db.delete(assignment)
     db.commit()
 
-# @router.get("/history", response_model=List[AssignmentHistoryResponse])
-# def get_assignment_history(shelf_id: Optional[str] = None, limit: int = 100, db: Session = Depends(get_db), current_user: Employee = Depends(require_store_manager)):
-#     query = db.query(AssignmentHistory)
-#     if shelf_id:
-#         query = query.filter(AssignmentHistory.shelf_id == shelf_id)
-
-#     history = query.order_by(AssignmentHistory.action_date.desc()).limit(limit).all()
-
-#     managers = {
-#         r.performed_by: db.query(Employee).filter(Employee.employee_id == r.performed_by).first()
-#         for r in history
-#     }
-
-#     # 🚀 Find matching assignment ID
-#     def get_assignment_id(emp_id: str, shelf_id: str):
-#         assignment = db.query(StaffAssignment).filter(
-#             StaffAssignment.employee_id == emp_id,
-#             StaffAssignment.shelf_id == shelf_id
-#         ).first()
-#         return assignment.id if assignment else None
-
-#     return [
-#         AssignmentHistoryResponse(
-#             id=r.id,
-#             assignment_id=get_assignment_id(r.employee_id, r.shelf_id),
-#             created_by=r.performed_by,
-#             timestamp=r.action_date,
-#             employee_id=r.employee_id,
-#             shelf_id=r.shelf_id,
-#             action=r.action,
-#             action_date=r.action_date,
-#             performed_by=r.performed_by,
-#             notes=r.notes,
-#             employee_name=r.employee.username,
-#             shelf_name=r.shelf.name,
-#             manager_name=managers[r.performed_by].username if managers[r.performed_by] else "Unknown"
-#         ) for r in history
-#     ]
-
-
 @router.post("/transfer/{assignment_id}", response_model=StaffAssignmentResponse)
 def transfer_staff_to_different_shelf(assignment_id: int, new_shelf_id: str, notes: Optional[str] = None, db: Session = Depends(get_db), current_user: Employee = Depends(require_store_manager)):
     assignment = db.query(StaffAssignment).filter(StaffAssignment.id == assignment_id).first()

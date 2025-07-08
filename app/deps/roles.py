@@ -1,16 +1,33 @@
-from fastapi import Depends, HTTPException
-from jose import JWTError, jwt
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+from app.database.db import get_db
+from app.models.employee import Employee # adjust import path
 from app.core.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+# Use HTTPBearer for Swagger "Bearer <token>" auth input
+bearer_scheme = HTTPBearer()
 
-def get_current_user_role(token: str = Depends(oauth2_scheme)):
+def get_current_user_role(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: Session = Depends(get_db)
+) -> Employee:
+    token = credentials.credentials  # Extract Bearer token string
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        role = payload.get("role")
-        if not role:
-            raise HTTPException(status_code=403, detail="Role missing")
-        return role
+        employee_id = payload.get("sub")
+
+        if not employee_id:
+            raise HTTPException(status_code=403, detail="Employee ID missing")
+
+        user = db.query(Employee).filter_by(employee_id=employee_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return user
+
     except JWTError:
-        raise HTTPException(status_code=403, detail="Invalid token")
+        raise HTTPException(status_code=403, detail="Invalid or expired token")
+

@@ -1,7 +1,7 @@
 # app/schemas/response.py
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 class ShelfWithAssignments(BaseModel):
     id: int
@@ -16,3 +16,9 @@ class ShelfWithAssignments(BaseModel):
 
     class Config:
         orm_mode = True
+
+class AssignmentStatusResponse(BaseModel):
+    assigned: bool
+    shelf_id: Optional[str] = None
+    notes: Optional[str] = None
+
