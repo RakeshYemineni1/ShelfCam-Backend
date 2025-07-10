@@ -5,7 +5,7 @@ from app.database.db import get_db
 from app.models.shelf import Shelf, ShelfCategoryEnum
 from app.models.employee import Employee
 from app.schemas.shelf import ShelfCreate, ShelfUpdate, ShelfResponse
-from app.core.auth import require_store_manager
+from app.deps.roles import require_store_manager
 from sqlalchemy.exc import IntegrityError
 from app.models.staff_assignment import StaffAssignment
 
@@ -109,7 +109,7 @@ def delete_shelf(
         )
 
     active_assignments = db.query(StaffAssignment).filter(
-        StaffAssignment.shelf_id == shelf.id,
+        StaffAssignment.shelf_id == shelf.name,
         StaffAssignment.is_active == True
     ).count()
 
@@ -145,7 +145,7 @@ def toggle_shelf_status(
 
     if shelf.is_active:
         active_assignments = db.query(StaffAssignment).filter(
-            StaffAssignment.shelf_id == shelf.id,
+            StaffAssignment.shelf_id == shelf.name,
             StaffAssignment.is_active == True
         ).count()
 

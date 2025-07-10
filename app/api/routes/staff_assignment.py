@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session, aliased
 from sqlalchemy import and_, select
 from typing import List, Optional
 from datetime import datetime
-
 from app.database.db import get_db
 from app.models.staff_assignment import StaffAssignment, AssignmentHistory
 from app.models.employee import Employee
@@ -14,7 +13,7 @@ from app.schemas.staff_assignment import (
     AvailableStaffResponse, AssignmentHistoryResponse, AssignmentDashboardResponse
 )
 from app.schemas.shelf import ShelfWithAssignments
-from app.core.auth import require_store_manager
+from app.deps.roles import require_store_manager
 
 router = APIRouter(prefix="/staff-assignments", tags=["staff-assignment"])
 
