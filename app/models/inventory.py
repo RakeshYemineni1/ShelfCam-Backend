@@ -10,5 +10,6 @@ class Inventory(Base):
     product_number = Column(String(50), nullable=False, unique=True)
     product_name = Column(String(200), nullable=False)
     category = Column(String(50), nullable=False)
+    rack_name = Column(String(100), nullable=False)  # New field for rack name
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

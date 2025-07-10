@@ -15,12 +15,14 @@ class InventoryCreate(BaseModel):
     product_number: str = Field(..., min_length=1, max_length=50, description="Unique product number")
     product_name: str = Field(..., min_length=1, max_length=200, description="Name of the product")
     category: CategoryEnum = Field(..., description="Product category")
+    rack_name: str = Field(..., min_length=1, max_length=100, description="Name of the rack")
 
 class InventoryUpdate(BaseModel):
     shelf_name: Optional[str] = Field(None, min_length=1, max_length=100)
     product_number: Optional[str] = Field(None, min_length=1, max_length=50)
     product_name: Optional[str] = Field(None, min_length=1, max_length=200)
     category: Optional[CategoryEnum] = None
+    rack_name: Optional[str] = Field(None, min_length=1, max_length=100)
 
 class InventoryResponse(BaseModel):
     id: int
@@ -28,8 +30,16 @@ class InventoryResponse(BaseModel):
     product_number: str
     product_name: str
     category: str
+    rack_name: str
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+class ShelfSlotsResponse(BaseModel):
+    shelf_name: str
+    capacity: int
+    occupied_slots: int
+    available_slots: int
+    occupied_racks: list[str]
