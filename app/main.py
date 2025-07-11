@@ -1,6 +1,6 @@
 from app.api.routes import auth, role_protected
 from fastapi import FastAPI
-from app.api.routes import auth, inventory,  shelf, staff_assignment, staff_dashboard
+from app.api.routes import auth, inventory,  shelf, staff_assignment, staff_dashboard, alerts
 from app.database.db import engine, Base
 from app.core.config import settings
 
@@ -21,6 +21,7 @@ app.include_router(inventory.router)
 app.include_router(shelf.router)
 app.include_router(staff_assignment.router)
 app.include_router(staff_dashboard.router)
+app.include_router(alerts.router)
 
 
 @app.get("/health")
