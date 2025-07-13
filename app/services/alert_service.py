@@ -1,4 +1,4 @@
-# app/services/alert_service.py - REWRITTEN for shelf-level detection
+# app/services/alert_service.py - Updated without WebSocket/Notification services
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
@@ -8,8 +8,6 @@ from app.models.shelf import Shelf
 from app.models.staff_assignment import StaffAssignment
 from app.models.employee import Employee
 from app.models.alert_history import AlertHistory
-from app.services.notification_service import NotificationService
-from app.services.websocket_service import WebSocketService
 import json
 from datetime import datetime, timedelta
 import logging
@@ -19,8 +17,6 @@ logger = logging.getLogger(__name__)
 class AlertService:
     def __init__(self, db: Session):
         self.db = db
-        self.notification_service = NotificationService()
-        self.websocket_service = WebSocketService()
         
         # SHELF-LEVEL STOCK THRESHOLDS
         self.STOCK_THRESHOLDS = {
@@ -56,10 +52,6 @@ class AlertService:
             
             # Commit all changes
             self.db.commit()
-            
-            # Send notifications for all created alerts
-            for alert in alerts_created:
-                self._send_alert_notifications(alert)
             
             logger.info(f"Successfully processed {len(alerts_created)} alerts for shelf {shelf_number}")
             
@@ -490,35 +482,6 @@ class AlertService:
         
         return assignment.employee_id if assignment else None
     
-    def _send_alert_notifications(self, alert: Alert):
-        """Send notifications for alert"""
-        
-        try:
-            # Send to assigned staff
-            if alert.assigned_staff_id:
-                staff = self.db.query(Employee).filter(
-                    Employee.employee_id == alert.assigned_staff_id
-                ).first()
-                
-                if staff and staff.is_active:
-                    self.notification_service.send_staff_notification(staff, alert)
-            
-            # Send to managers
-            managers = self.db.query(Employee).filter(
-                and_(
-                    Employee.role.in_(["manager", "store_manager"]),
-                    Employee.is_active == True
-                )
-            ).all()
-            
-            for manager in managers:
-                self.notification_service.send_manager_notification(manager, alert)
-            
-            logger.info(f"Notifications sent for alert {alert.id}")
-            
-        except Exception as e:
-            logger.error(f"Error sending notifications for alert {alert.id}: {str(e)}")
-    
     def _log_alert_action(self, alert_id: int, action: str, employee_id: Optional[str], notes: Optional[str]):
         """Log alert action to history"""
         
@@ -536,12 +499,13 @@ class AlertService:
     
     # Additional methods for API endpoints
     def get_active_alerts(self, employee_id: Optional[str] = None) -> List[Alert]:
-        """Get active alerts"""
+        """Get active alerts for dashboard"""
         
         query = self.db.query(Alert).filter(Alert.status == AlertStatus.ACTIVE)
         
         if employee_id:
             employee = self.db.query(Employee).filter(Employee.employee_id == employee_id).first()
+            # Only show assigned alerts for regular staff, show all for managers
             if employee and employee.role not in ["manager", "store_manager"]:
                 query = query.filter(Alert.assigned_staff_id == employee_id)
         
@@ -580,7 +544,7 @@ class AlertService:
         return False
     
     def get_alert_statistics(self) -> Dict:
-        """Get alert statistics"""
+        """Get alert statistics for dashboard"""
         
         total_active = self.db.query(Alert).filter(Alert.status == AlertStatus.ACTIVE).count()
         
