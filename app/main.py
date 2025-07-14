@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.routes import auth, inventory,  shelf, staff_assignment, staff_dashboard, alerts
 from app.database.db import engine, Base
 from app.core.config import settings
+from app.api.routes import detect
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +23,7 @@ app.include_router(shelf.router)
 app.include_router(staff_assignment.router)
 app.include_router(staff_dashboard.router)
 app.include_router(alerts.router)
+app.include_router(detect.router)
 
 
 @app.get("/health")
